@@ -47,7 +47,9 @@ FB.login = function (cb, opts) {
 		}
 		
 		// Fire off the original callback
-		cb(loginResponse);
+		if (cb) {
+			cb(loginResponse);
+		}
 	}
 
 	BASE_FB.login(ktCb, opts);
@@ -55,7 +57,6 @@ FB.login = function (cb, opts) {
 
 FB.ui = function (params, cb) {
 	var ktCb = cb;
-
 	var authResponse = FB.getAuthResponse();
 	
 	// Make sure the user is logged in and authenticated
@@ -96,7 +97,9 @@ FB.ui = function (params, cb) {
 						}
 					}
 					
-					cb(uiResponse);
+					if (cb) {
+						cb(uiResponse);
+					}
 				};
 				break;
 				
@@ -137,7 +140,9 @@ FB.ui = function (params, cb) {
 						});
 					}
 					
-					cb(uiResponse);
+					if (cb) {
+						cb(uiResponse);
+					}
 				};
 				break;
 			case("oauth"):
