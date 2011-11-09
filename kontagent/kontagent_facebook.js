@@ -23,7 +23,7 @@ FB.init = function(options)
 		"useTestServer": KT_USE_TEST_SERVER, 
 		"useHttps": (KT_USE_HTTPS == 'auto') ? FB._isHttps() : KT_USE_HTTPS
 	})
-	is
+
 	// Perform the landing page tracking. The timeout/delay is neccessary
   // otherwise
 	// FB will throw an error if we start making API calls too quickly.
