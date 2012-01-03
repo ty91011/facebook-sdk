@@ -25,14 +25,14 @@ FB.init = function(options)
 	})
 
 	// Perform the landing page tracking. The timeout/delay is neccessary
-  // otherwise
+  	// otherwise
 	// FB will throw an error if we start making API calls too quickly.
 	setTimeout("FB._trackLanding()", 1000);
 }
 
 FB.login = function (cb, opts) {
 	// Override the callback function to also send off an ApplicationAdded and
-  // UserInformation
+	// UserInformation
 	// message on success.
 	var ktCb = function (loginResponse) {
 		if (loginResponse.authResponse) {
@@ -43,7 +43,7 @@ FB.login = function (cb, opts) {
 			});
 			
 			FB._trackUserInformation();
-			FB._trackSpruce();
+			FB._trackSpruceMedia();
 		}
 		
 		// Fire off the original callback
@@ -174,7 +174,7 @@ FB._trackLanding = function()
 				});
 				
 				FB._trackUserInformation();
-				FB._trackSpruce();				
+				FB._trackSpruceMedia();				
 			}
 			
 			if (KT_GET['kt_track_ins']) {
@@ -302,9 +302,11 @@ FB._trackUserInformation = function()
 	});
 }
 
-FB._trackSpruce = function() {
-  // Spruce Media Ad Tracking
-  KT_GET['spruce_adid'] && FB._ktApi._sendHttpRequestViaImgTag(window.location.protocol + "//bp-pixel.sprucemedia.com/100480/pixel.ssps?spruce_adid=" + KT_GET["spruce_adid"] + "&spruce_sid=" + FB._ktApi.genShortUniqueTrackingTag());
+FB._trackSpruceMedia = function() {
+	// Spruce Media Ad Tracking
+	if (KT_GET['spruce_adid']) {
+		FB._ktApi._sendHttpRequestViaImgTag(window.location.protocol + "//bp-pixel.sprucemedia.com/100480/pixel.ssps?spruce_adid=" + KT_GET["spruce_adid"] + "&spruce_sid=" + FB._ktApi.genShortUniqueTrackingTag());
+	}
 }
 
 // Given a comma-separated list of requestIds will return the recipient userIds (comma-separated)
@@ -380,12 +382,15 @@ function KontagentApi(apiKey, optionalParams) {
 	this._baseTestServerUrl = "http://test-server.kontagent.com/api/v1/";
 
 	this._apiKey = apiKey;
-	this._useTestServer = (optionalParams.useTestServer) ? optionalParams.useTestServer : false;
-	this._useHttps = (optionalParams.useHttps) ? optionalParams.useHttps : false;
-	this._validateParams = (optionalParams.validateParams) ? optionalParams.validateParams : false;
+
+	if (optionalParams) {
+		this._useTestServer = (optionalParams.useTestServer) ? optionalParams.useTestServer : false;
+		this._useHttps = (optionalParams.useHttps) ? optionalParams.useHttps : false;
+		this._validateParams = (optionalParams.validateParams) ? optionalParams.validateParams : false;
+	}
 }
 
-/*
+/*{
 * Sends an HTTP request by creating an <img> tag given a URL.
 *
 * @param {string} url The request URL
@@ -509,7 +514,7 @@ KontagentApi.prototype.genShortUniqueTrackingTag = function() {
 /*
 * Sends an Invite Sent message to Kontagent.
 *
-* @param {string} userId The UID of the sending user
+* @param {int} userId The UID of the sending user
 * @param {string} recipientUserIds A comma-separated list of the recipient UIDs
 * @param {string} uniqueTrackingTag 32-digit hex string used to match 
 * 	InviteSent->InviteResponse->ApplicationAdded messages. 
@@ -570,7 +575,7 @@ KontagentApi.prototype.trackInviteResponse = function(uniqueTrackingTag, optiona
 /*
 * Sends an Notification Sent message to Kontagent.
 *
-* @param {string} userId The UID of the sending user
+* @param {int} userId The UID of the sending user
 * @param {string} recipientUserIds A comma-separated list of the recipient UIDs
 * @param {string} uniqueTrackingTag 32-digit hex string used to match 
 *	NotificationSent->NotificationResponse->ApplicationAdded messages. 
@@ -631,7 +636,7 @@ KontagentApi.prototype.trackNotificationResponse = function(uniqueTrackingTag, o
 /*
 * Sends an Notification Email Sent message to Kontagent.
 *
-* @param {string} userId The UID of the sending user
+* @param {int} userId The UID of the sending user
 * @param {string} recipientUserIds A comma-separated list of the recipient UIDs
 * @param {string} uniqueTrackingTag 32-digit hex string used to match 
 *	NotificationEmailSent->NotificationEmailResponse->ApplicationAdded messages. 
@@ -693,7 +698,7 @@ KontagentApi.prototype.trackNotificationEmailResponse = function(uniqueTrackingT
 /*
 * Sends an Stream Post message to Kontagent.
 *
-* @param {string} userId The UID of the sending user
+* @param {int} userId The UID of the sending user
 * @param {string} uniqueTrackingTag 32-digit hex string used to match 
 *	NotificationEmailSent->NotificationEmailResponse->ApplicationAdded messages. 
 *	See the genUniqueTrackingTag() helper method.
@@ -758,7 +763,7 @@ KontagentApi.prototype.trackStreamPostResponse = function(uniqueTrackingTag, typ
 /*
 * Sends an Custom Event message to Kontagent.
 *
-* @param {string} userId The UID of the user
+* @param {int} userId The UID of the user
 * @param {string} eventName The name of the event
 * @param {object} [optionalParams] An object containing paramName => value
 * @param {int} [optionalParams.value] A value associated with the event
@@ -789,7 +794,7 @@ KontagentApi.prototype.trackEvent = function(userId, eventName, optionalParams, 
 /*
 * Sends an Application Added message to Kontagent.
 *
-* @param {string} userId The UID of the installing user
+* @param {int} userId The UID of the installing user
 * @param {object} [optionalParams] An object containing paramName => value
 * @param {string} [optionalParams.uniqueTrackingTag] 16-digit hex string used to match 
 *	Invite/StreamPost/NotificationSent/NotificationEmailSent->ApplicationAdded messages. 
@@ -814,7 +819,7 @@ KontagentApi.prototype.trackApplicationAdded = function(userId, optionalParams, 
 /*
 * Sends an Application Removed message to Kontagent.
 *
-* @param {string} userId The UID of the removing user
+* @param {int} userId The UID of the removing user
 * @param {function} [successCallback] The callback function to execute once message has been sent successfully
 * @param {function(error)} [validationErrorCallback] The callback function to execute on validation failure
 */
@@ -858,7 +863,7 @@ KontagentApi.prototype.trackThirdPartyCommClick = function(type, shortUniqueTrac
 /*
 * Sends an Page Request message to Kontagent.
 *
-* @param {string} userId The UID of the user
+* @param {int} userId The UID of the user
 * @param {object} [optionalParams] An object containing paramName => value
 * @param {string} [optionalParams.ipAddress] The current users IP address
 * @param {string} [optionalParams.pageAddress] The current page address (ex: index.html)
@@ -881,7 +886,7 @@ KontagentApi.prototype.trackPageRequest = function(userId, optionalParams, succe
 /*
 * Sends an User Information message to Kontagent.
 *
-* @param {string} userId The UID of the user
+* @param {int} userId The UID of the user
 * @param {object} [optionalParams] An object containing paramName => value
 * @param {int} [optionalParams.birthYear] The birth year of the user
 * @param {string} [optionalParams.gender] The gender of the user (m,f,u)
@@ -906,7 +911,7 @@ KontagentApi.prototype.trackUserInformation = function (userId, optionalParams, 
 /*
 * Sends an Goal Count message to Kontagent.
 *
-* @param {string} userId The UID of the user
+* @param {int} userId The UID of the user
 * @param {object} [optionalParams] An object containing paramName => value
 * @param {int} [optionalParams.goalCount1] The amount to increment goal count 1 by
 * @param {int} [optionalParams.goalCount2] The amount to increment goal count 2 by
@@ -931,7 +936,7 @@ KontagentApi.prototype.trackGoalCount = function(userId, optionalParams, success
 /*
 * Sends an Revenue message to Kontagent.
 *
-* @param {string} userId The UID of the user
+* @param {int} userId The UID of the user
 * @param {int} value The amount of revenue in cents
 * @param {object} [optionalParams] An object containing paramName => value
 * @param {string} [optionalParams.type] The transaction type (direct, indirect, advertisement, credits, other)
@@ -1039,7 +1044,6 @@ KtValidator._validateGc3 = function(messageType, paramName, paramValue) {
 
 KtValidator._validateGc4 = function(messageType, paramName, paramValue) {
 	return KtValidator._validateGc1(messageType, paramName, paramValue);
-
 }
 
 KtValidator._validateI = function(messageType, paramName, paramValue) {

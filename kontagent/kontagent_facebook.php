@@ -40,9 +40,9 @@ class KontagentFacebook extends Facebook
 		
 		// Output config and GET variables to Javascript so they can be 
 		// accessed on the client side. Used by the kontagent_facebook.js library.
-		$this->outputVarsToJs();
-		
 		$this->trackLanding();
+		
+		$this->outputVarsToJs();
 	}
 	
 	// Returns the Kontagent API wrapper object which can be used to manually fire
@@ -186,7 +186,7 @@ class KontagentFacebook extends Facebook
 	}
 	
 	// Returns the Pay Dialog url. This method takes in the parameters defined by Facebook
-	// (see FB documentation).
+	// (see FB documentation).echo '<script
 	public function getPayDialogUrl($params = array())
 	{
 		return $this->getUrl( 
@@ -270,6 +270,7 @@ class KontagentFacebook extends Facebook
 		if (KT_SEND_CLIENT_SIDE) {
 			echo 'var KT_SEND_CLIENT_SIDE = true;';
 		} else {
+
 			echo 'var KT_SEND_CLIENT_SIDE = false;';
 		}
 
@@ -321,7 +322,6 @@ class KontagentFacebook extends Facebook
 				// we also store the unique tracking tag parameter to the $_GET 
 				// because this is where the code will look for it when application added is generated.
 				$_GET['kt_u'] = $ktDataVars['kt_u'];
-				echo '<script>KT_GET["kt_u"] = "' . $_GET['kt_u'] . '";</script>';
 				
 				$this->ktApi->trackInviteResponse($ktDataVars['kt_u'], array(
 					'recipientUserId' => $request['to']['id'],
@@ -339,9 +339,8 @@ class KontagentFacebook extends Facebook
 			// Note that generating this tag is outside the "if (!KT_SEND_CLIENT_SIDE)" because it is always
 			// generated on the server side (otherwise there is no way to get the generated value back to PHP.)
 			$_GET['kt_su'] = $this->ktApi->genShortUniqueTrackingTag();
-			echo '<script>KT_GET["kt_su"] = "' . $_GET['kt_su'] . '";</script>';
 		}
-	
+
 		if (!KT_SEND_CLIENT_SIDE) {
 			if ($this->getUser()) {
 				if (isset($_GET['kt_track_apa']) && !isset($_GET['error'])) {
@@ -379,6 +378,15 @@ class KontagentFacebook extends Facebook
 						'birthYear' => (isset($birthYear)) ? $birthYear : null,
 						'friendCount' => (isset($friendCount)) ? $friendCount : null
 					));
+		
+					// Spruce Media Ad Tracking  
+					if (isset($_GET['spruce_adid'])) {
+						$spruceUrl = 'http://bp-pixel.sprucemedia.com/100480/pixel.ssps';
+						$spruceUrl .= '?spruce_adid=' . $_GET["spruce_adid"];
+						$spruceUrl .= '&spruce_sid=' . $this->ktApi->genShortUniqueTrackingTag();
+
+						$this->ktApi->sendHttpRequest($spruceUrl);
+					}
 				}
 				
 				if (isset($_GET['kt_track_ins'])) {
@@ -431,15 +439,6 @@ class KontagentFacebook extends Facebook
 					'subtype2' => (isset($_GET['kt_st2'])) ? $_GET['kt_st2'] : null,
 					'subtype3' => (isset($_GET['kt_st3'])) ? $_GET['kt_st3'] : null
 				));
-			}
-
-			// Spruce Media Ad Tracking  
-			if (isset($_GET['spruce_adid'])) {
-				$spruceUrl = 'http://bp-pixel.sprucemedia.com/100480/pixel.ssps';
-				$spruceUrl .= '?spruce_adid=' . $_GET["spruce_adid"];
-				$spruceUrl .= '&spruce_sid=' . $this->ktApi->genShortUniqueTrackingTag();
-
-				$this->ktApi->sendHttpRequest($spruceUrl);
 			}
 		}
 	}
@@ -495,6 +494,7 @@ class KontagentFacebook extends Facebook
 			if (isset($val)) {
 				$url .= $key . '=' . $val . '&';
 			}
+
 		}
 		
 		// remove trailing ampersand
@@ -693,7 +693,7 @@ class KontagentApi {
 	/*
 	* Sends an Invite Sent message to Kontagent.
 	*
-	* @param string $userId The UID of the sending user
+	* @param int $userId The UID of the sending user
 	* @param string $recipientUserIds A comma-separated list of the recipient UIDs
 	* @param string $uniqueTrackingTag 32-digit hex string used to match 
 	*	InviteSent->InviteResponse->ApplicationAdded messages. 
@@ -752,7 +752,7 @@ class KontagentApi {
 	/*
 	* Sends an Notification Sent message to Kontagent.
 	*
-	* @param string $userId The UID of the sending user
+	* @param int $userId The UID of the sending user
 	* @param string $recipientUserIds A comma-separated list of the recipient UIDs
 	* @param string $uniqueTrackingTag 32-digit hex string used to match 
 	*	NotificationSent->NotificationResponse->ApplicationAdded messages. 
@@ -811,7 +811,7 @@ class KontagentApi {
 	/*
 	* Sends an Notification Email Sent message to Kontagent.
 	*
-	* @param string $userId The UID of the sending user
+	* @param int $userId The UID of the sending user
 	* @param string $recipientUserIds A comma-separated list of the recipient UIDs
 	* @param string $uniqueTrackingTag 32-digit hex string used to match 
 	*	NotificationEmailSent->NotificationEmailResponse->ApplicationAdded messages. 
@@ -870,7 +870,7 @@ class KontagentApi {
 	/*
 	* Sends an Stream Post message to Kontagent.
 	*
-	* @param string $userId The UID of the sending user
+	* @param int $userId The UID of the sending user
 	* @param string $uniqueTrackingTag 32-digit hex string used to match 
 	*	NotificationEmailSent->NotificationEmailResponse->ApplicationAdded messages. 
 	*	See the genUniqueTrackingTag() helper method.
@@ -933,7 +933,7 @@ class KontagentApi {
 	/*
 	* Sends an Custom Event message to Kontagent.
 	*
-	* @param string $userId The UID of the user
+	* @param int $userId The UID of the user
 	* @param string $eventName The name of the event
 	* @param array $optionalParams An associative array containing paramName => value
 	* @param int $optionalParams['value'] A value associated with the event
@@ -963,7 +963,7 @@ class KontagentApi {
 	/*
 	* Sends an Application Added message to Kontagent.
 	*
-	* @param string $userId The UID of the installing user
+	* @param int $userId The UID of the installing user
 	* @param array $optionalParams An associative array containing paramName => value
 	* @param string $optionalParams['uniqueTrackingTag'] 16-digit hex string used to match 
 	*	Invite/StreamPost/NotificationSent/NotificationEmailSent->ApplicationAdded messages. 
@@ -987,7 +987,7 @@ class KontagentApi {
 	/*
 	* Sends an Application Removed message to Kontagent.
 	*
-	* @param string $userId The UID of the removing user
+	* @param int $userId The UID of the removing user
 	* @param string $validationErrorMsg The error message on validation failure
 	* 
 	* @return bool Returns false on validation failure, true otherwise
@@ -1031,7 +1031,7 @@ class KontagentApi {
 	/*
 	* Sends an Page Request message to Kontagent.
 	*
-	* @param string $userId The UID of the user
+	* @param int $userId The UID of the user
 	* @param array $optionalParams An associative array containing paramName => value
 	* @param int $optionalParams['ipAddress'] The current users IP address
 	* @param string $optionalParams['pageAddress'] The current page address (ex: index.html)
@@ -1054,7 +1054,7 @@ class KontagentApi {
 	/*
 	* Sends an User Information message to Kontagent.
 	*
-	* @param string $userId The UID of the user
+	* @param int $userId The UID of the user
 	* @param array $optionalParams An associative array containing paramName => value
 	* @param int $optionalParams['birthYear'] The birth year of the user
 	* @param string $optionalParams['gender'] The gender of the user (m,f,u)
@@ -1078,7 +1078,7 @@ class KontagentApi {
 	/*
 	* Sends an Goal Count message to Kontagent.
 	*
-	* @param string $userId The UID of the user
+	* @param int $userId The UID of the user
 	* @param array $optionalParams An associative array containing paramName => value
 	* @param int $optionalParams['goalCount1'] The amount to increment goal count 1 by
 	* @param int $optionalParams['goalCount2'] The amount to increment goal count 2 by
@@ -1102,7 +1102,7 @@ class KontagentApi {
 	/*
 	* Sends an Revenue message to Kontagent.
 	*
-	* @param string $userId The UID of the user
+	* @param int $userId The UID of the user
 	* @param int $value The amount of revenue in cents
 	* @param array $optionalParams An associative array containing paramName => value
 	* @param string $optionalParams['type'] The transaction type (direct, indirect, advertisement, credits, other)
@@ -1159,7 +1159,7 @@ class KtValidator
 	
 	private static function validateB($messageType, $paramValue, &$validationErrorMsg = null) {
 		// birthyear param (cpu message)
-		if (!filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1900, 'max_range' => 2011)))) {
+		if (filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1900, 'max_range' => 2011))) === false) {
 			$validationErrorMsg = 'Invalid birth year.';
 			return false;
 		} else {
@@ -1169,7 +1169,7 @@ class KtValidator
 	
 	private static function validateF($messageType, $paramValue, &$validationErrorMsg = null) {
 		// friend count param (cpu message)
-		if(!filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)))) {
+		if(filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1))) === false) {
 			$validationErrorMsg = 'Invalid friend count.';
 			return false;
 		} else {
@@ -1189,7 +1189,7 @@ class KtValidator
 	
 	private static function validateGc1($messageType, $paramValue, &$validationErrorMsg = null) {
 		// goal count param (gc1, gc2, gc3, gc4 messages)
-		if (!filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => -16384, 'max_range' => 16384)))) {
+		if (filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => -16384, 'max_range' => 16384))) === false) {
 			$validationErrorMsg = 'Invalid goal count value.';
 			return false;
 		} else {
@@ -1221,7 +1221,7 @@ class KtValidator
 	
 	private static function validateIp($messageType, $paramValue, &$validationErrorMsg = null) {
 		// ip param (pgr messages)
-		if (!filter_var($paramValue, FILTER_VALIDATE_IP)) {
+		if (filter_var($paramValue, FILTER_VALIDATE_IP) === false) {
 			$validationErrorMsg = 'Invalid ip address value.';
 			return false;
 		} else {
@@ -1231,7 +1231,7 @@ class KtValidator
 	
 	private static function validateL($messageType, $paramValue, &$validationErrorMsg = null) {
 		// level param (evt messages)
-		if (!filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)))) {
+		if (filter_var($paramValue, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1))) === false) {
 			$validationErrorMsg = 'Invalid level value.';
 			return false;
 		} else {
@@ -1282,7 +1282,7 @@ class KtValidator
 			}
 		} elseif ($messageType == 'inr' || $messageType == 'psr' || $messageType == 'nei' || $messageType == 'ntr') {
 			// recipient param (inr, psr, nei, ntr messages)
-			if (!filter_var($paramValue, FILTER_VALIDATE_INT)) {
+			if (filter_var($paramValue, FILTER_VALIDATE_INT) === false) {
 				$validationErrorMsg = 'Invalid recipient user id.';
 				return false;
 			}
@@ -1293,7 +1293,7 @@ class KtValidator
 	
 	private static function validateS($messageType, $paramValue, &$validationErrorMsg = null) {
 		// userId param
-		if (!filter_var($paramValue, FILTER_VALIDATE_INT)) {
+		if (filter_var($paramValue, FILTER_VALIDATE_INT) === false) {
 			$validationErrorMsg = 'Invalid user id.';
 			return false;
 		} else {
@@ -1331,7 +1331,7 @@ class KtValidator
 	
 	private static function validateTs($messageType, $paramValue, &$validationErrorMsg = null) {
 		// timestamp param (pgr message)
-		if (!filter_var($paramValue, FILTER_VALIDATE_INT)) {
+		if (filter_var($paramValue, FILTER_VALIDATE_INT) === false) {
 			$validationErrorMsg = 'Invalid timestamp.';
 			return false;
 		} else {
@@ -1366,7 +1366,7 @@ class KtValidator
 		// unique tracking tag parameter for all messages EXCEPT pgr.
 		// for pgr messages, this is the "page address" param
 		if ($messageType != 'pgr') {
-			if (preg_match('/^[A-Fa-f0-9]{32}$/', $paramValue) == 0) {
+			if (preg_match('/^[A-Fa-f0-9]{16}$/', $paramValue) == 0) {
 				$validationErrorMsg = 'Invalid unique tracking tag.';
 				return false;
 			}
@@ -1377,7 +1377,7 @@ class KtValidator
 	
 	private static function validateV($messageType, $paramValue, &$validationErrorMsg = null) {
 		// value param (mtu, evt messages)
-		if (!filter_var($paramValue, FILTER_VALIDATE_INT)) {
+		if (filter_var($paramValue, FILTER_VALIDATE_INT) === false) {
 			$validationErrorMsg = 'Invalid value.';
 			return false;
 		} else {
