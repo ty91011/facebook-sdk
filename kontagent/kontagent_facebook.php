@@ -271,6 +271,7 @@ class KontagentFacebook extends Facebook
 			echo 'var KT_SEND_CLIENT_SIDE = true;';
 		} else {
 
+
 			echo 'var KT_SEND_CLIENT_SIDE = false;';
 		}
 
@@ -381,7 +382,7 @@ class KontagentFacebook extends Facebook
 		
 					// Spruce Media Ad Tracking  
 					if (isset($_GET['spruce_adid'])) {
-						$spruceUrl = 'http://bp-pixel.sprucemedia.com/100480/pixel.ssps';
+						$spruceUrl = 'http://bp-pixel.socialcash.com/100480/pixel.ssps';
 						$spruceUrl .= '?spruce_adid=' . $_GET["spruce_adid"];
 						$spruceUrl .= '&spruce_sid=' . $this->ktApi->genShortUniqueTrackingTag();
 
