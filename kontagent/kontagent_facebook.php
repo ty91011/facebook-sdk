@@ -316,20 +316,23 @@ class KontagentFacebook extends Facebook
 				$requestId = $requestIds[sizeof($requestIds)-1];
 				$request = $this->api('/' . $requestId);
 				
-				// extract parameters that was stored in the data field
-				// (kt_u, kt_st1, kt_st2, kt_st3)
-				$ktDataVars = $this->extractKtVarsFromDataField($request['data']);
-				
-				// we also store the unique tracking tag parameter to the $_GET 
-				// because this is where the code will look for it when application added is generated.
-				$_GET['kt_u'] = $ktDataVars['kt_u'];
-				
-				$this->ktApi->trackInviteResponse($ktDataVars['kt_u'], array(
-					'recipientUserId' => $request['to']['id'],
-					'subtype1' => (isset($ktDataVars['kt_st1'])) ? $ktDataVars['kt_st1'] : null,
-					'subtype2' => (isset($ktDataVars['kt_st2'])) ? $ktDataVars['kt_st2'] : null,
-					'subtype3' => (isset($ktDataVars['kt_st3'])) ? $ktDataVars['kt_st3'] : null
-				));
+				// Check for actual existence of request
+				if($request) {
+					// extract parameters that was stored in the data field
+					// (kt_u, kt_st1, kt_st2, kt_st3)
+					$ktDataVars = $this->extractKtVarsFromDataField($request['data']);
+					
+					// we also store the unique tracking tag parameter to the $_GET 
+					// because this is where the code will look for it when application added is generated.
+					$_GET['kt_u'] = $ktDataVars['kt_u'];
+					
+					$this->ktApi->trackInviteResponse($ktDataVars['kt_u'], array(
+						'recipientUserId' => $request['to']['id'],
+						'subtype1' => (isset($ktDataVars['kt_st1'])) ? $ktDataVars['kt_st1'] : null,
+						'subtype2' => (isset($ktDataVars['kt_st2'])) ? $ktDataVars['kt_st2'] : null,
+						'subtype3' => (isset($ktDataVars['kt_st3'])) ? $ktDataVars['kt_st3'] : null
+					));
+				}
 			} catch (FacebookApiException $e) { }
 		}
 
